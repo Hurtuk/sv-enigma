@@ -1,0 +1,26 @@
+.page-content {
+    position: absolute;
+    top: 25px;
+    bottom: 25px;
+    left: 25px;
+    right: 25px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, .8) inset;
+    overflow: auto;
+    background-color: lightgray;
+    padding: 20px;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: url('/assets/images/steampunk_gears_clockwork_widescreen_watch_cogs_2324x1616.jpg');
+        background-size: cover;
+        background-position: center center;
+        opacity: .4;
+        z-index: 0;
+    }
+}
