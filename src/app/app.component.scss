@@ -7,7 +7,7 @@
     border-radius: 20px;
     box-shadow: 0 0 10px 5px rgba(0, 0, 0, .8) inset;
     overflow: auto;
-    background-color: lightgray;
+    background-color: gray;
     padding: 20px;
 
     &::before {
@@ -20,7 +20,7 @@
         background: url('/assets/images/steampunk_gears_clockwork_widescreen_watch_cogs_2324x1616.jpg');
         background-size: cover;
         background-position: center center;
-        opacity: .4;
+        opacity: .3;
         z-index: 0;
     }
 }

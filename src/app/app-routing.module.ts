@@ -5,7 +5,7 @@ import { HomeComponent } from './home/home.component';
 
 
 const routes: Routes = [
-  { path: 'enigma/{code}', component: EnigmaComponent },
+  { path: 'enigma/:code', component: EnigmaComponent },
   { path: '**', component: HomeComponent }
 ];
 
