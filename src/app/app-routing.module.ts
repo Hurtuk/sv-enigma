@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { EnigmaComponent } from './enigma/enigma.component';
+import { AnswerComponent } from './answer/answer.component';
 import { HomeComponent } from './home/home.component';
+import { ScenarioComponent } from './scenario/scenario.component';
 
 
 const routes: Routes = [
-  { path: 'enigma/:code', component: EnigmaComponent },
+  { path: 'answer/:code', component: AnswerComponent },
+  { path: 'scenario/:code', component: ScenarioComponent },
   { path: '**', component: HomeComponent }
 ];
 

@@ -7,8 +7,6 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EnigmaComponent implements OnInit {
 
-  public answer: string;
-
   constructor() { }
 
   ngOnInit(): void {

@@ -8,6 +8,11 @@
     src: url(/assets/fonts/VT323-Regular.ttf);
 }
 
+@font-face {
+    font-family: "Lato";
+    src: url(/assets/fonts/Lato-Bold.ttf);
+}
+
 html, body {
     padding: 0;
     margin: 0;
@@ -30,29 +35,35 @@ body {
     text-align: center;
 }
 
-p {
+p,
+h2 {
     margin: 0;
-    text-shadow: 0 0 10px black;
+    text-shadow: 0 0 60px black;
+    font-weight: normal;
 }
 
-button {
+.qr {
     display: block;
     margin: 0 auto;
-    text-align: center;
-    cursor: pointer;
-    font-size: 18px;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    padding: 15px 40px;
-    outline: none;
-    border: none;
-    width: 100%;
-    border-radius: 5px;
-    box-shadow: 0 9px #95a5a6;
-    font-family: Anton;
-    
-    &:active {
-        box-shadow: 0 5px #95a5a6;
-        transform: translateY(4px);
+    width: 50px;
+    height: 50px;
+    background: transparent url(/assets/images/qr.png) no-repeat center center;
+    background-size: contain;
+
+    &.red {
+        filter: invert(13%) sepia(77%) saturate(6121%) hue-rotate(358deg) brightness(101%) contrast(112%);
+    }
+}
+
+.enigma-button {
+    background-color: transparent;
+    border: 0;
+
+    svg {
+        width: 100%;
+
+        * {
+            box-shadow: 0 0 5px white;
+        }
     }
 }

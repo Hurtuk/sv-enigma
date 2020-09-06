@@ -1,0 +1,22 @@
+:host {
+    display: block;
+    position: relative;
+    z-index: 1;
+    height: 100%;
+}
+
+.enigma {
+    margin-top: 30px;
+}
+
+p {
+    font-family: Lato;
+    text-align: justify;
+    font-size: 1.2em;
+}
+
+.enigma-button {
+    width: 150px;
+    height: 150px;
+    margin-top: 30px;
+}
