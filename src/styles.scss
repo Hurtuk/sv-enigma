@@ -35,11 +35,21 @@ body {
     text-align: center;
 }
 
-p,
-h2 {
+h2, h3 {
     margin: 0;
-    text-shadow: 0 0 60px black;
+    text-shadow: 0 0 15px black;
     font-weight: normal;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+p {
+    text-align: justify;
+    font-family: Lato;
+    text-shadow: 0 0 15px black;
+    font-size: 1.2rem;
 }
 
 .qr {
@@ -61,13 +71,13 @@ h2 {
     top: calc(100% + 20px);
     left: -20px;
     right: -20px;
-    height: 250px;
+    height: 150px;
     text-align: left;
     padding: 20px 40px;
     transition: margin-top .5s;
 
     &.opened {
-        margin-top: -250px;
+        margin-top: -150px;
     }
 
     h2 {

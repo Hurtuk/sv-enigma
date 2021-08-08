@@ -3,7 +3,7 @@ export class Question {
     color: string;
     number: number;
     placeEnigma: string;
-    place: string;
+    name: string;
     question: string;
     answer: string;
 }

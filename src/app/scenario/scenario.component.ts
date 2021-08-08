@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Question } from '../model/question';
 import { ToolsService } from '../tools.service';
 
@@ -19,13 +19,14 @@ export class ScenarioComponent implements OnInit {
 
   public scanOpen = false;
 
-  public currentToken!: string;
+  public answer?: string;
 
-  public answer: string;
+  public routerLoading = false;
 
   constructor(
     private tools: ToolsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -33,9 +34,11 @@ export class ScenarioComponent implements OnInit {
     this.route.paramMap
       .subscribe(params => {
         const code = params.get('code')!;
-
         this.tools.getEnigma(code)
           .subscribe(question => {
+            if (!question) {
+              this.router.navigate(['/']);
+            }
             // Afficher l'énigme du lieu et le scanner
             this.enigma = question;
           });
@@ -45,33 +48,33 @@ export class ScenarioComponent implements OnInit {
   }
 
   public scanSuccessHandler($event: any) {
-    console.log('success', $event);
     if (this.enigma?.code === $event) {
       this.guessingPlace = false;
-
-      // Si bonne valeur scannée, on masque les composants actuels et on affiche l'énigme avec le formulaire pour répondre
-
     } else {
       this.error("QR Code erroné. Êtes-vous dans la bonne salle ?");
     }
   }
 
   public scanErrorHandler($event: any) {
-    console.log('error', $event);
     this.error('Impossible de trouver l\'appareil photo... Faites-vous ça avec un appareil du XXIème siècle ?');
   }
 
   public validateAnswer() {
-    this.error('Mauvaise réponse');
-
-
-    // Si réponse OK, on redirige vers la suivante
+    if (this.answer?.toUpperCase() !== this.enigma?.answer.toUpperCase()) {
+      this.error('Ce n\'est pas la bonne réponse !');
+      delete this.answer;
+    } else {
+      this.routerLoading = true;
+      setTimeout(() => {
+        this.router.navigate(['/scenario/' + this.tools.getNextEnigmaCode(this.enigma?.color!, this.enigma?.number!)]);
+      }, 0);
+    }
   }
 
   private error(message: string) {
     this.errorMessage = message;
     this.errorOpen = true;
-    setTimeout(() => this.errorOpen = false, 3000);
+    setTimeout(() => this.errorOpen = false, 2000);
   }
 
 }

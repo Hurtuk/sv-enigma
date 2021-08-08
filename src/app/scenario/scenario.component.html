@@ -1,9 +1,12 @@
-<i class="top-icon qr red"></i>
+
+<img src="../../assets/images/ajax-loader.gif" class="loader" *ngIf="!enigma" />
 <ng-container *ngIf="enigma">
-    <h2>Chapitre 3</h2>
+    <i [class]="'top-icon qr ' + enigma.color"></i>
+    <h2>Chapitre {{ enigma.number }}</h2>
     <div class="enigma" *ngIf="guessingPlace; else question">
         <div class="place-enigma" [innerHtml]="enigma.placeEnigma"></div>
         <zxing-scanner
+            *ngIf="enigma.question"
             (click)="scanOpen = true"
             [enable]="scanOpen"
             (scanSuccess)="scanSuccessHandler($event)"
@@ -11,15 +14,20 @@
         ></zxing-scanner>
     </div>
     <ng-template #question>
-        <h2>Le réfectoire</h2>
-        <div class="question"></div>
-        <p>Réponse :</p>
-        <input type="text" [(ngModel)]="answer" />
-        <p>{{19 - answer?.length}} {{19 - answer?.length > 1 ? 'lettres restantes' : 'lettre restante'}}</p>
-        <button type="button" class="unlock-button" (click)="validateAnswer()">
-            Déverrouiller
-            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="key" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-key fa-w-16 fa-7x"><path fill="currentColor" d="M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z" class=""></path></svg>
-        </button>
+        <h3>{{ enigma.name }}</h3>
+        <div class="enigma">
+            <div class="question" [innerHtml]="enigma.question"></div>
+            <input type="text" [(ngModel)]="answer" [maxlength]="enigma.answer?.length" [disabled]="errorOpen" />
+            <span class="remaining">{{enigma.answer?.length - answer?.length}} {{enigma.answer?.length - answer?.length > 1 ? 'lettres restantes' : 'lettre restante'}}</span>
+            <button type="button" #answerInput class="unlock-button" (click)="validateAnswer()" [disabled]="errorOpen || routerLoading || enigma.answer?.length !== answer?.length">
+                <ng-container *ngIf="!routerLoading; else loading">
+                    Transmettre<br/>au PC central
+                </ng-container>
+                <ng-template #loading>
+                    <img src="../../assets/images/ajax-loader.gif" width="50" />
+                </ng-template>
+            </button>
+        </div>
     </ng-template>
 </ng-container>
 <div class="answer-panel panel-error" [class.opened]="errorOpen">

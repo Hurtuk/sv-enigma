@@ -13,12 +13,6 @@
     padding: 20px;
 }
 
-p {
-    font-family: Lato;
-    text-align: justify;
-    font-size: 1.2em;
-}
-
 @keyframes fingerprint {
     from {
         background-size: 60%;
@@ -44,12 +38,9 @@ zxing-scanner {
     }
 }
 
-
-
-
-
-p {
-    font-size: 1.2em;
+.loader {
+    width: 50px;
+    margin: 40px auto;
 }
 
 input {
@@ -72,14 +63,35 @@ input {
     text-transform: uppercase;
 }
 
-.unlock-button {
-    position: absolute;
-    bottom: 50px;
-    background-color: #27AE60;
-    color: white;
+.remaining {
+    font-family: Lato;
+    color: yellow;
+    display: block;
+}
 
-    svg {
-        height: 15px;
-        margin-left: 5px;
+.unlock-button {
+    background: transparent url(../../assets/images/button.png) no-repeat top center;
+    background-size: cover;
+    color: white;
+    margin-top: 20px;
+    border: 0;
+    text-transform: uppercase;
+    font-family: Anton;
+    letter-spacing: 1px;
+    padding: 20px;
+    width: 100%;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    height: 112px;
+    text-shadow: 0 0 3px black;
+    line-height: 1.8rem;
+
+    &:active {
+        background-position: bottom center;
+    }
+
+    &:disabled {
+        filter: grayscale(100%);
+        opacity: 75%;
     }
 }
