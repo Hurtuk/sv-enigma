@@ -10,12 +10,15 @@ import { ToolsService } from '../tools.service';
 })
 export class ScenarioComponent implements OnInit {
 
+  private static ERROR_DURATION = 2000;
+  private static PENALTY_DURATION = 30000;
+
   public errorMessage?: string;
   public errorOpen = false;
 
   public guessingPlace = true;
 
-  public enigma?: Question;
+  public enigma: Question;
 
   public scanOpen = false;
 
@@ -60,21 +63,33 @@ export class ScenarioComponent implements OnInit {
   }
 
   public validateAnswer() {
-    if (this.answer?.toUpperCase() !== this.enigma?.answer.toUpperCase()) {
-      this.error('Ce n\'est pas la bonne réponse !');
-      delete this.answer;
-    } else {
-      this.routerLoading = true;
-      setTimeout(() => {
-        this.router.navigate(['/scenario/' + this.tools.getNextEnigmaCode(this.enigma?.color!, this.enigma?.number!)]);
-      }, 0);
+    if (this.answer) {
+      const a =  ScenarioComponent.normalize(this.answer);
+      const toFind = ScenarioComponent.normalize(this.enigma.answer);
+      if (a !== toFind) {
+        if (toFind.length === 1) {
+          this.error(`Ce n'est pas la bonne réponse ! Malheureusement, vous avez fait surchauffer le PC central et devez attendre ${ScenarioComponent.PENALTY_DURATION / 1000} secondes avant de pouvoir réessayer.`, ScenarioComponent.PENALTY_DURATION);
+        } else {
+          this.error('Ce n\'est pas la bonne réponse !');
+        }
+        delete this.answer;
+      } else {
+        this.routerLoading = true;
+        setTimeout(() => {
+          this.router.navigate(['/scenario/' + this.tools.getNextEnigmaCode(this.enigma?.color!, this.enigma?.number!)]);
+        }, 0);
+      }
     }
   }
 
-  private error(message: string) {
+  private error(message: string, duration = ScenarioComponent.ERROR_DURATION) {
     this.errorMessage = message;
     this.errorOpen = true;
-    setTimeout(() => this.errorOpen = false, 2000);
+    setTimeout(() => this.errorOpen = false, duration);
+  }
+
+  private static normalize(str: string): string {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ').toUpperCase();
   }
 
 }
