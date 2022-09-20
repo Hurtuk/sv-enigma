@@ -13,11 +13,21 @@
     src: url(/assets/fonts/Lato-Bold.ttf);
 }
 
-html, body {
+html {
+    height: -webkit-fill-available;
+}
+
+body {
     padding: 0;
     margin: 0;
-    width: 100vw;
-    height: 100vh;
+    min-height: 100%;
+}
+
+@supports (-webkit-touch-callout: none) {
+    body {
+        /* The hack for Safari */
+        min-height: -webkit-fill-available;
+    }
 }
 
 body {
@@ -45,11 +55,15 @@ h3 {
     font-size: 2rem;
 }
 
-p {
+p, ol, ul {
     text-align: justify;
     font-family: Lato;
     text-shadow: 0 0 15px black;
     font-size: 1.2rem;
+}
+
+ol {
+    list-style-type: upper-alpha;
 }
 
 .qr {
@@ -63,6 +77,36 @@ p {
     &.red {
         filter: invert(13%) sepia(77%) saturate(6121%) hue-rotate(358deg) brightness(101%) contrast(112%);
     }
+    &.yellow {
+        filter: invert(89%) sepia(84%) saturate(781%) hue-rotate(354deg) brightness(104%) contrast(107%);
+    }
+    &.blue {
+        filter: invert(8%) sepia(86%) saturate(7186%) hue-rotate(246deg) brightness(109%) contrast(147%);
+    }
+    &.green {
+        filter: invert(24%) sepia(93%) saturate(1849%) hue-rotate(104deg) brightness(97%) contrast(108%);
+    }
+    &.gray {
+        filter: invert(66%) sepia(97%) saturate(0%) hue-rotate(253deg) brightness(99%) contrast(104%);
+    }
+    &.pink {
+        filter: invert(75%) sepia(38%) saturate(5881%) hue-rotate(310deg) brightness(148%) contrast(121%);
+    }
+    &.purple {
+        filter: invert(13%) sepia(60%) saturate(4532%) hue-rotate(289deg) brightness(91%) contrast(117%);
+    }
+    &.brown {
+        filter: invert(25%) sepia(23%) saturate(6624%) hue-rotate(345deg) brightness(79%) contrast(83%);
+    }
+    &.orange {
+        filter: invert(78%) sepia(76%) saturate(3709%) hue-rotate(360deg) brightness(100%) contrast(110%);
+    }
+    &.cyan {
+        filter: invert(100%) sepia(38%) saturate(7498%) hue-rotate(100deg) brightness(98%) contrast(107%);
+    }
+    &.lightgreen {
+        filter: invert(86%) sepia(20%) saturate(877%) hue-rotate(63deg) brightness(98%) contrast(91%);
+    }
 }
 
 .answer-panel {
@@ -71,13 +115,13 @@ p {
     top: calc(100% + 20px);
     left: -20px;
     right: -20px;
-    height: 150px;
+    height: 220px;
     text-align: left;
     padding: 20px 40px;
     transition: margin-top .5s;
 
     &.opened {
-        margin-top: -150px;
+        margin-top: -220px;
     }
 
     h2 {
@@ -87,4 +131,24 @@ p {
     &.panel-error {
         background-color: #c50000;
     }
+}
+
+zxing-scanner {
+    aspect-ratio: 1;
+    margin: 20px auto;
+    display: block;
+    background: rgba(255, 255, 255, .3) url(/assets/images/fingerprint.png) no-repeat center center;
+    background-size: 75%;
+    width: 75%;
+    min-width: 220px;
+    animation: .5s ease-in 0s infinite alternate fingerprint;
+
+    &::ng-deep video {
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+img {
+    max-width: 100%;
 }

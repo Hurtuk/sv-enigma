@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Question } from './model/question';
-import { delay } from 'rxjs/operators';
+import { Md5 } from 'ts-md5';
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +15,11 @@ export class ToolsService {
   ) { }
 
   public getEnigma(code: string): Observable<Question> {
-    return this.http.get<Question>(environment.apiUrl + 'getEnigma.php', { params: { code } }).pipe(delay(1000)); // TODO
+    return this.http.get<Question>(environment.apiUrl + 'getEnigma.php', { params: { code } });
   }
 
   public getNextEnigmaCode(color: string, number: number): string {
-    return 'b'; // TODO
+    return (new Md5()).appendStr(color + (number + 1)).end()!.toString().substring(0, 10);
   }
+
 }

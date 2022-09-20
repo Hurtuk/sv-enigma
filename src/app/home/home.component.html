@@ -1,3 +1,11 @@
-<img class="logo" src="/assets/images/logo9.png" />
-<p>Bienvenue sur l'appli SV Enigma !</p>
-<p>Site en cours de construction...</p>
+<img src="/assets/images/ajax-loader.gif" *ngIf="!ready" />
+<ng-container *ngIf="ready">
+    <img class="logo" src="/assets/images/logo9.png" />
+    <p>Vous l'avez entendu : le professeur Nicleth a besoin de vous pour sauver le monde !</p>
+    <p>Pour démarrer votre enquête, posez votre index et scannez le QR code de votre équipe.</p>
+    <zxing-scanner
+        (click)="scanOpen = true"
+        [enable]="scanOpen"
+        (scanSuccess)="scanSuccessHandler($event)"
+        ></zxing-scanner>
+</ng-container>

@@ -3,22 +3,24 @@
     <i [class]="'top-icon qr ' + enigma.color"></i>
     <h2>Chapitre {{ enigma.number }}</h2>
     <div class="enigma" *ngIf="guessingPlace; else question">
-        <div class="place-enigma" [innerHtml]="enigma.placeEnigma"></div>
-        <zxing-scanner
-            *ngIf="enigma.question"
-            (click)="scanOpen = true"
-            [enable]="scanOpen"
-            (scanSuccess)="scanSuccessHandler($event)"
-            (scanError)="scanErrorHandler($event)"
-        ></zxing-scanner>
+        <div class="place-enigma" [innerHtml]="enigma.placeEnigma | safeHtml"></div>
+        <ng-container *ngIf="enigma.question">
+            <p>Trouvez la salle suivante, puis scannez le QR code de votre équipe.</p>
+            <zxing-scanner
+                (click)="scanOpen = true"
+                [enable]="scanOpen"
+                (scanSuccess)="scanSuccessHandler($event)"
+                (scanError)="scanErrorHandler($event)"
+            ></zxing-scanner>
+        </ng-container>
     </div>
     <ng-template #question>
         <h3>{{ enigma.name }}</h3>
         <div class="enigma">
-            <div class="question" [innerHtml]="enigma.question"></div>
-            <input type="text" [(ngModel)]="answer" [maxlength]="enigma.answer?.length" [disabled]="errorOpen" />
-            <span class="remaining">{{enigma.answer?.length - answer?.length}} {{enigma.answer?.length - answer?.length > 1 ? 'lettres restantes' : 'lettre restante'}}</span>
-            <button type="button" #answerInput class="unlock-button" (click)="validateAnswer()" [disabled]="errorOpen || routerLoading || enigma.answer?.length !== answer?.length">
+            <div class="question" [innerHtml]="enigma.question | safeHtml"></div>
+            <input type="text" [(ngModel)]="answer" [maxlength]="enigma.answer?.length" [disabled]="errorOpen" (keyup.enter)="closeKeyboard()" />
+            <span class="remaining">{{enigma.answer?.length - answer?.length}} {{enigma.answer?.length - answer?.length > 1 ? chars : char}}</span>
+            <button #sendButton type="button" #answerInput class="unlock-button" (click)="validateAnswer()" [disabled]="errorOpen || routerLoading || enigma.answer?.length !== answer?.length">
                 <ng-container *ngIf="!routerLoading; else loading">
                     Transmettre<br/>au PC central
                 </ng-container>

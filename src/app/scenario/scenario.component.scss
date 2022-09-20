@@ -22,22 +22,6 @@
     }
 }
 
-zxing-scanner {
-    aspect-ratio: 1;
-    margin: 20px auto;
-    display: block;
-    background: rgba(255, 255, 255, .3) url(../../assets/images/fingerprint.png) no-repeat center center;
-    background-size: 75%;
-    width: 75%;
-    min-width: 220px;
-    animation: .5s ease-in 0s infinite alternate fingerprint;
-
-    &::ng-deep video {
-        height: 100%;
-        object-fit: contain;
-    }
-}
-
 .loader {
     width: 50px;
     margin: 40px auto;
@@ -58,7 +42,7 @@ input {
     transition: box-shadow 300ms;
     text-align: center;
     position: relative;
-    z-index: 1;
+    z-index: 0;
     font-family: VT323;
     text-transform: uppercase;
 }
@@ -79,12 +63,13 @@ input {
     font-family: Anton;
     letter-spacing: 1px;
     padding: 20px;
-    width: 100%;
+    width: 250px;
     border-radius: 5px;
     font-size: 1.5rem;
-    height: 112px;
+    height: 104px;
     text-shadow: 0 0 3px black;
     line-height: 1.8rem;
+    outline: 0;
 
     &:active {
         background-position: bottom center;

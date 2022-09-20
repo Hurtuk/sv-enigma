@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Question } from '../model/question';
 import { ToolsService } from '../tools.service';
@@ -13,18 +13,24 @@ export class ScenarioComponent implements OnInit {
   private static ERROR_DURATION = 2000;
   private static PENALTY_DURATION = 30000;
 
+  public chars: string;
+  public char: string;
+
+  @ViewChild('sendButton')
+  public sendButton: ElementRef;
+
   public errorMessage?: string;
   public errorOpen = false;
 
-  public guessingPlace = true;
+  public guessingPlace: boolean;
 
   public enigma: Question;
 
-  public scanOpen = false;
+  public scanOpen: boolean;
 
   public answer?: string;
 
-  public routerLoading = false;
+  public routerLoading: boolean;
 
   constructor(
     private tools: ToolsService,
@@ -34,9 +40,12 @@ export class ScenarioComponent implements OnInit {
 
   ngOnInit(): void {
     // Code en argument de l'URL
-    this.route.paramMap
-      .subscribe(params => {
+    this.route.paramMap.subscribe(params => {
         const code = params.get('code')!;
+        this.guessingPlace = true;
+        this.scanOpen = false;
+        this.routerLoading = false;
+        delete this.answer;
         this.tools.getEnigma(code)
           .subscribe(question => {
             if (!question) {
@@ -44,6 +53,13 @@ export class ScenarioComponent implements OnInit {
             }
             // Afficher l'énigme du lieu et le scanner
             this.enigma = question;
+            if (this.enigma.answer?.match(/^[0-9]+$/)) {
+              this.chars = "chiffres restants";
+              this.char = "chiffre restant";
+            } else {
+              this.chars = "lettres restantes";
+              this.char = "lettre restante";
+            }
           });
       }
     );
@@ -80,6 +96,10 @@ export class ScenarioComponent implements OnInit {
         }, 0);
       }
     }
+  }
+
+  public closeKeyboard() {
+    this.sendButton.nativeElement.focus();
   }
 
   private error(message: string, duration = ScenarioComponent.ERROR_DURATION) {

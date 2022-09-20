@@ -8,12 +8,14 @@ import { HomeComponent } from './home/home.component';
 import { ScenarioComponent } from './scenario/scenario.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { HttpClientModule } from '@angular/common/http';
+import { SafeHtmlPipe } from './safe-html.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    ScenarioComponent
+    ScenarioComponent,
+    SafeHtmlPipe
   ],
   imports: [
     BrowserModule,
