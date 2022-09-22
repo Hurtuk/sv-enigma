@@ -1,5 +1,5 @@
 <img src="../../assets/images/ajax-loader.gif" class="loader" *ngIf="!enigma" />
-<ng-container *ngIf="enigma">
+<div class="enigma-wrapper" *ngIf="enigma" #enigmaWrapper>
     <i [class]="'top-icon qr ' + enigma.color"></i>
     <h2>Chapitre {{ enigma.number }}</h2>
     <div class="enigma" *ngIf="guessingPlace; else question">
@@ -10,7 +10,7 @@
                 (click)="scanOpen = true"
                 [enable]="scanOpen"
                 (scanSuccess)="scanSuccessHandler($event)"
-                (scanError)="scanErrorHandler($event)"
+                (scanError)="scanErrorHandler()"
             ></zxing-scanner>
         </ng-container>
     </div>
@@ -30,7 +30,7 @@
             </button>
         </div>
     </ng-template>
-</ng-container>
+</div>
 <div class="answer-panel panel-error" [class.opened]="errorOpen">
     <h2>Erreur</h2>
     <p>{{ errorMessage }}</p>

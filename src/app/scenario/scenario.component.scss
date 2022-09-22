@@ -7,9 +7,12 @@
     overflow: hidden;
 }
 
+.enigma-wrapper {
+    overflow: auto;
+}
+
 .enigma {
     flex: 1;
-    overflow: auto;
     padding: 20px;
 }
 

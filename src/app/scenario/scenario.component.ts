@@ -19,6 +19,9 @@ export class ScenarioComponent implements OnInit {
   @ViewChild('sendButton')
   public sendButton: ElementRef;
 
+  @ViewChild('enigmaWrapper')
+  public wrapper: ElementRef;
+
   public errorMessage?: string;
   public errorOpen = false;
 
@@ -51,6 +54,7 @@ export class ScenarioComponent implements OnInit {
             if (!question) {
               this.router.navigate(['/']);
             }
+            setTimeout(() => this.wrapper.nativeElement.scrollTop = 0, 0);
             // Afficher l'énigme du lieu et le scanner
             this.enigma = question;
             if (this.enigma.answer?.match(/^[0-9]+$/)) {
@@ -69,12 +73,13 @@ export class ScenarioComponent implements OnInit {
   public scanSuccessHandler($event: any) {
     if (this.enigma?.code === $event) {
       this.guessingPlace = false;
+      setTimeout(() => this.wrapper.nativeElement.scrollTop = 0, 0);
     } else {
       this.error("QR Code erroné. Êtes-vous dans la bonne salle ?");
     }
   }
 
-  public scanErrorHandler($event: any) {
+  public scanErrorHandler() {
     this.error('Impossible de trouver l\'appareil photo... Faites-vous ça avec un appareil du XXIème siècle ?');
   }
 
@@ -88,7 +93,6 @@ export class ScenarioComponent implements OnInit {
         } else {
           this.error('Ce n\'est pas la bonne réponse !');
         }
-        delete this.answer;
       } else {
         this.routerLoading = true;
         setTimeout(() => {
