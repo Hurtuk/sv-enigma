@@ -109,6 +109,9 @@
           }
         }
       }
-    }},
-  "defaultProject": "sv-enigma"
+    }
+  },
+  "cli": {
+    "analytics": "e65c1dfa-98b8-49a1-bff6-9e9d7ab5b94b"
+  }
 }
