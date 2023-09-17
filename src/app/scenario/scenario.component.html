@@ -18,11 +18,11 @@
         <h3>{{ enigma.name }}</h3>
         <div class="enigma">
             <div class="question" [innerHtml]="enigma.question | safeHtml"></div>
-            <input type="text" [(ngModel)]="answer" [maxlength]="enigma.answer?.length" [disabled]="errorOpen" (keyup.enter)="closeKeyboard()" />
             <span class="remaining">{{enigma.answer?.length - answer?.length}} {{enigma.answer?.length - answer?.length > 1 ? chars : char}}</span>
+            <input type="text" [(ngModel)]="answer" [maxlength]="enigma.answer?.length" [disabled]="errorOpen" (keyup.enter)="closeKeyboard()" />
             <button #sendButton type="button" #answerInput class="unlock-button" (click)="validateAnswer()" [disabled]="errorOpen || routerLoading || enigma.answer?.length !== answer?.length">
                 <ng-container *ngIf="!routerLoading; else loading">
-                    Transmettre<br/>au PC central
+                    Envoyer
                 </ng-container>
                 <ng-template #loading>
                     <img src="../../assets/images/ajax-loader.gif" width="50" />

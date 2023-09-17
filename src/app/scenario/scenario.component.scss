@@ -46,31 +46,30 @@ input {
     text-align: center;
     position: relative;
     z-index: 0;
-    font-family: VT323;
+    font-family: 'Poiret One';
     text-transform: uppercase;
 }
 
 .remaining {
-    font-family: Lato;
-    color: yellow;
+    color: gold;
     display: block;
+    font-weight: bold;
+    text-shadow: 0 0 3px black;
 }
 
 .unlock-button {
-    background: transparent url(../../assets/images/button.png) no-repeat top center;
+    background: #e0c351;
     background-size: cover;
-    color: white;
+    color: black;
     margin-top: 20px;
     border: 0;
     text-transform: uppercase;
-    font-family: Anton;
-    letter-spacing: 1px;
-    padding: 20px;
-    width: 250px;
-    border-radius: 5px;
+    font-family: 'Poiret One';
+    letter-spacing: 3px;
+    padding: 10px;
+    width: 220px;
     font-size: 1.5rem;
-    height: 104px;
-    text-shadow: 0 0 3px black;
+    height: 80px;
     line-height: 1.8rem;
     outline: 0;
 
