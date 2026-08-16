@@ -16,13 +16,13 @@
 				foreach ($colors as $i => $c) {
 					if ($questions[$i]) {
 						if ($updates[$i] == '1') {
-							$db->update('UPDATE questions SET question = ?, answer = ? WHERE id = (SELECT idQuestion FROM transitions WHERE color = ? AND idPlace = ?)',
+							$db->update('UPDATE {p}questions SET question = ?, answer = ? WHERE id = (SELECT idQuestion FROM {p}transitions WHERE color = ? AND idPlace = ?)',
 								array($questions[$i], $answers[$i], $c, $place));
 						} else {
-							$db->update('INSERT INTO questions (question, answer) VALUES (?, ?)',
+							$db->update('INSERT INTO {p}questions (question, answer) VALUES (?, ?)',
 								array($questions[$i], $answers[$i]));
-							$id = $db->selectVal('SELECT id FROM questions ORDER BY id DESC LIMIT 1')['id'];
-							$db->update('UPDATE transitions SET idQuestion = ? WHERE color = ? AND idPlace = ?',
+							$id = $db->selectVal('SELECT id FROM {p}questions ORDER BY id DESC LIMIT 1')['id'];
+							$db->update('UPDATE {p}transitions SET idQuestion = ? WHERE color = ? AND idPlace = ?',
 								array($id, $colors[$i], $place));
 						}
 					}
@@ -31,16 +31,16 @@
 			case 'to-place':
 				$transition = $_POST['transition'];
 				$enigma = $_POST['place-enigma'];
-				$db->update("UPDATE transitions SET placeEnigma = ? WHERE id = ?", array($enigma, $transition));
+				$db->update("UPDATE {p}transitions SET placeEnigma = ? WHERE id = ?", array($enigma, $transition));
 				break;
 		}
 	}
 
 	/**********/
 
-	$req = 'SELECT t.*, q.id as idQuestion, q.question, q.answer, p.name FROM transitions t
-			INNER JOIN places p ON p.id = t.idPlace
-			LEFT JOIN questions q ON q.id = t.idQuestion
+	$req = 'SELECT t.*, q.id as idQuestion, q.question, q.answer, p.name FROM {p}transitions t
+			INNER JOIN {p}places p ON p.id = t.idPlace
+			LEFT JOIN {p}questions q ON q.id = t.idQuestion
 			ORDER BY color, number';
 
 	$transitions = $db->select($req);
@@ -123,7 +123,7 @@
 			<legend>Les lieux</legend>
 			<ul>
 				<?php
-					$places = $db->select('SELECT * FROM places ORDER BY name');
+					$places = $db->select('SELECT * FROM {p}places ORDER BY name');
 					foreach ($places as $p) {
 						// Le hall n'accueille pas d'énigme : rien à y rédiger.
 						if ($p['name'] !== 'Le hall') {

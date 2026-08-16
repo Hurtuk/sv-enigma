@@ -8,10 +8,10 @@
 	$code = $_GET['code'] ?? '';
 
 	$enigma = $db->selectVal('SELECT color, code, number, placeEnigma, question, answer, name
-							FROM transitions t
-							INNER JOIN places p
+							FROM {p}transitions t
+							INNER JOIN {p}places p
 							ON p.id = t.idPlace
-							LEFT JOIN questions q
+							LEFT JOIN {p}questions q
 							ON q.id = t.idQuestion
 							WHERE code = ?', array($code));
 

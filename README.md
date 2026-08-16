@@ -1,6 +1,6 @@
 # SvEnigma
 
-Jeu de piste de l'Institution Saint-Victrice — https://nicoailleurs.com/sv
+Jeu de piste de l'Institution Saint-Victrice — https://ohrm.fr/sv
 
 Douze équipes, identifiées par une couleur, parcourent l'établissement pour
 retrouver Georges Liot, maire de Bihorel disparu le soir de l'inauguration, en 1903.
@@ -77,7 +77,7 @@ la résout explicitement contre `document.baseURI`.
 ## Back (`back/`)
 
 PHP + MySQL. Le contenu de `back/` est déployé au même endroit que le build du
-front, soit `/nicoailleurs/sv` en FTP :
+front, soit `/ohrm.fr/sv` en FTP :
 
 ```
 sv/
@@ -97,12 +97,17 @@ Le `.htaccess` ne doit contenir **aucune directive `Options`** : le mutualisé L
 restreint `AllowOverride` et répond 500 sur tout le dossier, images comprises,
 dès qu'il en rencontre une. Son `RewriteBase` doit suivre le préfixe du site.
 
-La base `mystery` compte trois tables : `places` (les salles), `questions`
-(énigme + réponse) et `transitions` (le parcours d'une couleur, une ligne par
-chapitre, qui relie une salle et une question).
+Le jeu tient en trois tables : `places` (les salles), `questions` (énigme +
+réponse) et `transitions` (le parcours d'une couleur, une ligne par chapitre,
+qui relie une salle et une question).
 
-Les colonnes sont en `latin1` tandis que `DB.class.php` fait `SET NAMES utf8` :
-la conversion se fait à la volée, ne pas « corriger » l'un sans l'autre.
+### Base partagée et préfixe de tables
+
+L'hébergement n'offre qu'une base pour tous les projets. Ces trois noms étant
+bien trop courants pour y être posés nus, les tables sont préfixées, comme dans
+les autres projets : les requêtes écrivent `{p}` devant chaque table, et
+`DB.class.php` le remplace par la clé `prefix` de `config.php` (`sv_` par
+défaut). Un préfixe vide redonne les noms nus.
 
 Les identifiants de la base sont dans `back/php/config.php`, exclu du dépôt car
 celui-ci est public. Le modèle à recopier est `back/php/config.sample.php`.
@@ -116,7 +121,7 @@ directement en base.
 
 ## Déploiement
 
-Cible : `https://nicoailleurs.com/sv`, soit `/nicoailleurs/sv` en FTP.
+Cible : `https://ohrm.fr/sv`, soit `/ohrm.fr/sv` en FTP.
 
 1. `cd front && npm run build` (la configuration de production pose `baseHref: /sv/`)
 2. Envoyer le contenu de `front/dist/sv-enigma/browser/` dans `sv/` —
@@ -129,14 +134,26 @@ et un transfert interrompu laisse alors l'ancienne version fonctionnelle.
 `php/config.php` n'étant pas dans le dépôt, il vit sur le serveur avec les
 identifiants de l'hébergement : ne pas l'écraser en déployant.
 
-### Migration de la base
+### Installation de la base
 
-Le dump de l'ancien hébergement est antérieur au passage en sous-répertoire :
-les six énigmes du musée y citent encore leurs images en `src="/badge.png"`.
-Après import sur le nouveau serveur, jouer une fois :
+Le port MySQL de l'hébergement n'est pas joignable depuis un poste de travail :
+tout passe par phpMyAdmin.
 
-```
-back/migrations/2026-08-16-images-relatives.sql
-```
+1. Jouer `back/migrations/2026-08-16-schema-base-partagee.sql` — il crée les
+   trois tables préfixées en `utf8mb4`, sans toucher à l'existant
+   (`CREATE TABLE IF NOT EXISTS`).
+2. Importer le fichier de données, **absent du dépôt** : il contient toutes les
+   réponses du jeu et ce dépôt est public. Le régénérer depuis la base locale :
 
-Elle est rejouable sans dommage.
+   ```bash
+   mysqldump -u root --default-character-set=utf8mb4 --no-tablespaces \
+     --skip-comments --compact mystery places questions transitions
+   ```
+
+   puis préfixer les noms de tables en `sv_`.
+3. Renseigner `back/php/config.php` sur le serveur avec les identifiants de la
+   base partagée et le même préfixe.
+
+`back/migrations/2026-08-16-images-relatives.sql` rend relatives les images des
+énigmes du musée ; elle est déjà appliquée au contenu exporté ci-dessus, et
+rejouable sans dommage.
