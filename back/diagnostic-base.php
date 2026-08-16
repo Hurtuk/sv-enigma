@@ -57,13 +57,21 @@
 		exit;
 	}
 
+	// Toutes les tables de la base, pour voir ce qui s'y trouve réellement :
+	// les tables du jeu peuvent déjà exister, préfixées ou non.
+	echo "tables présentes dans la base :\n";
+	$tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+	if (!$tables) {
+		echo "  (aucune — la base est vide)\n";
+	}
+	foreach ($tables as $t) {
+		$n = $pdo->query('SELECT COUNT(*) FROM `' . $t . '`')->fetchColumn();
+		echo '  ' . str_pad($t, 30) . " $n lignes\n";
+	}
+
+	echo "\nce que le jeu cherche (préfixe courant) :\n";
 	$prefix = $config['prefix'] ?? '';
 	foreach (array('places', 'questions', 'transitions') as $table) {
 		$nom = $prefix . $table;
-		try {
-			$n = $pdo->query('SELECT COUNT(*) FROM `' . $nom . '`')->fetchColumn();
-			echo str_pad("table $nom", 24) . ": $n lignes\n";
-		} catch (PDOException $e) {
-			echo str_pad("table $nom", 24) . ": ABSENTE\n";
-		}
+		echo '  ' . str_pad($nom, 30) . ' ' . (in_array($nom, $tables, true) ? 'trouvée' : 'ABSENTE') . "\n";
 	}

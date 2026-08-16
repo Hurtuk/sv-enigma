@@ -130,10 +130,8 @@ if (-not (Test-Path $coucheFtps)) {
 }
 . $coucheFtps
 
-$cfg = Get-DeployConfig
-
 if ($TestConnection) {
-    Test-FtpsConnection -cfg $cfg
+    Test-FtpsConnection
     return
 }
 
@@ -144,7 +142,7 @@ foreach ($f in $aLivrer) {
     $destination = "$repertoireDistant/$($f.Distant)"
     Write-Host ("  {0}" -f $f.Distant) -NoNewline
     try {
-        Send-RemoteFile -cfg $cfg -Local $f.Local -Distant $destination
+        Send-RemoteFile -LocalPath $f.Local -RemotePath $destination
         Write-Host "  ok" -ForegroundColor Green
         $envoyes++
     } catch {
