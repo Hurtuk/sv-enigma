@@ -58,3 +58,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Identifiants de livraison (FTP, base). Jamais versionnés.
+/.secrets/
