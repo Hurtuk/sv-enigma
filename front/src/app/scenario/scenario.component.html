@@ -1,38 +1,53 @@
-<img src="../../assets/images/ajax-loader.gif" class="loader" *ngIf="!enigma" />
-<div class="enigma-wrapper" *ngIf="enigma" #enigmaWrapper>
-    <i [class]="'top-icon qr ' + enigma.color"></i>
-    <h2>Chapitre {{ enigma.number }}</h2>
-    <div class="enigma" *ngIf="guessingPlace; else question">
-        <div class="place-enigma" [innerHtml]="enigma.placeEnigma | safeHtml"></div>
-        <ng-container *ngIf="enigma.question">
-            <p>Trouvez la salle suivante, puis scannez le QR code de votre équipe.</p>
-            <zxing-scanner
-                (click)="scanOpen = true"
-                [enable]="scanOpen"
-                (scanSuccess)="scanSuccessHandler($event)"
-                (scanError)="scanErrorHandler()"
-            ></zxing-scanner>
-        </ng-container>
-    </div>
-    <ng-template #question>
-        <h3>{{ enigma.name }}</h3>
-        <div class="enigma">
-            <div class="question" [innerHtml]="enigma.question | safeHtml"></div>
-            <span class="remaining">{{enigma.answer?.length - answer?.length}} {{enigma.answer?.length - answer?.length > 1 ? chars : char}}</span>
-            <input type="text" [(ngModel)]="answer" [maxlength]="enigma.answer?.length" [disabled]="errorOpen" (keyup.enter)="closeKeyboard()" />
-            <button #sendButton type="button" #answerInput class="unlock-button" (click)="validateAnswer()" [disabled]="errorOpen || routerLoading || enigma.answer?.length !== answer?.length">
-                <ng-container *ngIf="!routerLoading; else loading">
-                    Envoyer
-                </ng-container>
-                <ng-template #loading>
-                    <img src="../../assets/images/ajax-loader.gif" width="50" />
-                </ng-template>
-            </button>
-        </div>
-    </ng-template>
-</div>
-<div class="answer-panel panel-error" [class.opened]="errorOpen">
-    <h2>Erreur</h2>
-    <p>{{ errorMessage }}</p>
-</div>
+@if (enigma(); as chapter) {
+  <div class="enigma-wrapper" #enigmaWrapper>
+    <i class="top-icon qr {{ chapter.color }}"></i>
+    <h2>Chapitre {{ chapter.number }}</h2>
+    @if (guessingPlace()) {
+      <div class="enigma">
+        <div class="place-enigma" [innerHtml]="chapter.placeEnigma | safeHtml"></div>
+        @if (chapter.question) {
+          <p>Trouvez la salle suivante, puis scannez le QR code de votre équipe.</p>
+          <zxing-scanner
+            [enable]="scanning()"
+            (click)="scanning.set(true)"
+            (scanSuccess)="onRoomScanned($event)"
+            (scanError)="onScanError()"
+          ></zxing-scanner>
+        }
+      </div>
+    } @else {
+      <h3>{{ chapter.name }}</h3>
+      <div class="enigma">
+        <div class="question" [innerHtml]="chapter.question | safeHtml"></div>
+        <span class="remaining">{{ remaining() }} {{ remainingLabel() }}</span>
+        <input
+          type="text"
+          [(ngModel)]="answer"
+          [maxlength]="expectedLength()"
+          [disabled]="errorOpen()"
+          (keyup.enter)="closeKeyboard()"
+        />
+        <button
+          #sendButton
+          type="button"
+          class="unlock-button"
+          [disabled]="errorOpen() || loadingNext() || remaining() !== 0"
+          (click)="validateAnswer()"
+        >
+          @if (loadingNext()) {
+            <img src="/assets/images/ajax-loader.gif" width="50" alt="Chargement en cours" />
+          } @else {
+            Envoyer
+          }
+        </button>
+      </div>
+    }
+  </div>
+} @else {
+  <img src="/assets/images/ajax-loader.gif" class="loader" alt="Chargement en cours" />
+}
 
+<div class="answer-panel panel-error" [class.opened]="errorOpen()">
+  <h2>Erreur</h2>
+  <p>{{ errorMessage() }}</p>
+</div>

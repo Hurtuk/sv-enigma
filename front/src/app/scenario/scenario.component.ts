@@ -1,119 +1,168 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  Injector,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+
 import { Question } from '../model/question';
+import { SafeHtmlPipe } from '../safe-html.pipe';
 import { ToolsService } from '../tools.service';
+
+/** Durée d'affichage d'un message d'erreur ordinaire. */
+const ERROR_DURATION = 2000;
+
+/**
+ * Une réponse d'un seul caractère se trouve trop vite en essayant tout :
+ * une erreur bloque alors la saisie le temps que ça refroidisse.
+ */
+const PENALTY_DURATION = 30000;
 
 @Component({
   selector: 'sv-scenario',
+  imports: [FormsModule, SafeHtmlPipe, ZXingScannerModule],
   templateUrl: './scenario.component.html',
-  styleUrls: ['./scenario.component.scss']
+  styleUrl: './scenario.component.scss',
 })
 export class ScenarioComponent implements OnInit {
+  private readonly tools = inject(ToolsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private static ERROR_DURATION = 2000;
-  private static PENALTY_DURATION = 30000;
+  private readonly sendButton = viewChild<ElementRef<HTMLButtonElement>>('sendButton');
+  private readonly wrapper = viewChild<ElementRef<HTMLElement>>('enigmaWrapper');
 
-  public chars: string;
-  public char: string;
+  private errorTimer?: ReturnType<typeof setTimeout>;
 
-  @ViewChild('sendButton')
-  public sendButton: ElementRef;
+  constructor() {
+    this.destroyRef.onDestroy(() => clearTimeout(this.errorTimer));
+  }
 
-  @ViewChild('enigmaWrapper')
-  public wrapper: ElementRef;
+  protected readonly enigma = signal<Question | null>(null);
 
-  public errorMessage?: string;
-  public errorOpen = false;
+  /** Vrai tant que l'équipe cherche la salle ; faux une fois sur place, devant l'énigme. */
+  protected readonly guessingPlace = signal(true);
 
-  public guessingPlace: boolean;
+  /** La caméra n'est allumée qu'au premier appui, pour ne pas demander l'autorisation trop tôt. */
+  protected readonly scanning = signal(false);
 
-  public enigma: Question;
+  protected readonly answer = signal('');
 
-  public scanOpen: boolean;
+  /** Vrai entre la bonne réponse et l'arrivée du chapitre suivant. */
+  protected readonly loadingNext = signal(false);
 
-  public answer?: string;
+  protected readonly errorMessage = signal('');
+  protected readonly errorOpen = signal(false);
 
-  public routerLoading: boolean;
+  protected readonly expectedLength = computed(() => this.enigma()?.answer?.length ?? 0);
 
-  constructor(
-    private tools: ToolsService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) { }
+  protected readonly remaining = computed(() => this.expectedLength() - this.answer().length);
+
+  protected readonly remainingLabel = computed(() => {
+    const numeric = /^[0-9]+$/.test(this.enigma()?.answer ?? '');
+    if (this.remaining() > 1) {
+      return numeric ? 'chiffres restants' : 'lettres restantes';
+    }
+    return numeric ? 'chiffre restant' : 'lettre restante';
+  });
 
   ngOnInit(): void {
-    // Code en argument de l'URL
-    this.route.paramMap.subscribe(params => {
-        const code = params.get('code')!;
-        this.guessingPlace = true;
-        this.scanOpen = false;
-        this.routerLoading = false;
-        delete this.answer;
-        this.tools.getEnigma(code)
-          .subscribe(question => {
-            if (!question) {
-              this.router.navigate(['/']);
-            }
-            setTimeout(() => this.wrapper.nativeElement.scrollTop = 0, 0);
-            // Afficher l'énigme du lieu et le scanner
-            this.enigma = question;
-            if (this.enigma.answer?.match(/^[0-9]+$/)) {
-              this.chars = "chiffres restants";
-              this.char = "chiffre restant";
-            } else {
-              this.chars = "lettres restantes";
-              this.char = "lettre restante";
-            }
-          });
-      }
-    );
-
-  }
-
-  public scanSuccessHandler($event: any) {
-    if (this.enigma?.code === $event) {
-      this.guessingPlace = false;
-      setTimeout(() => this.wrapper.nativeElement.scrollTop = 0, 0);
-    } else {
-      this.error("QR Code erroné. Êtes-vous dans la bonne salle ?");
-    }
-  }
-
-  public scanErrorHandler() {
-    this.error('Impossible de trouver l\'appareil photo... Faites-vous ça avec un appareil du XXIème siècle ?');
-  }
-
-  public validateAnswer() {
-    if (this.answer) {
-      const a =  ScenarioComponent.normalize(this.answer);
-      const toFind = ScenarioComponent.normalize(this.enigma.answer);
-      if (a !== toFind) {
-        if (toFind.length === 1) {
-          this.error(`Ce n'est pas la bonne réponse ! Malheureusement, vous avez fait surchauffer le PC central et devez attendre ${ScenarioComponent.PENALTY_DURATION / 1000} secondes avant de pouvoir réessayer.`, ScenarioComponent.PENALTY_DURATION);
-        } else {
-          this.error('Ce n\'est pas la bonne réponse !');
+    // Passer au chapitre suivant ne recrée pas le composant, seul le paramètre change :
+    // c'est donc ici, et pas dans ngOnInit seul, que se fait le chargement.
+    const subscription = this.route.paramMap.subscribe((params) => {
+      const code = params.get('code') ?? '';
+      this.answer.set('');
+      this.tools.getEnigma(code).subscribe((question) => {
+        if (!question) {
+          this.router.navigate(['/']);
+          return;
         }
-      } else {
-        this.routerLoading = true;
-        setTimeout(() => {
-          this.router.navigate(['/scenario/' + this.tools.getNextEnigmaCode(this.enigma?.color!, this.enigma?.number!)]);
-        }, 0);
-      }
+        // Le chapitre précédent reste affiché jusqu'ici : pas de clignotement entre les deux.
+        this.enigma.set(question);
+        this.guessingPlace.set(true);
+        this.scanning.set(false);
+        this.loadingNext.set(false);
+        this.scrollToTop();
+      });
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  /** Chaque salle affiche un QR code par équipe, qui vaut le code de l'étape en cours. */
+  protected onRoomScanned(value: string): void {
+    if (this.enigma()?.code === value) {
+      this.guessingPlace.set(false);
+      this.scrollToTop();
+    } else {
+      this.showError('QR Code erroné. Êtes-vous dans la bonne salle ?');
     }
   }
 
-  public closeKeyboard() {
-    this.sendButton.nativeElement.focus();
+  protected onScanError(): void {
+    this.showError(
+      "Impossible de trouver l'appareil photo... Faites-vous ça avec un appareil du XXIème siècle ?",
+    );
   }
 
-  private error(message: string, duration = ScenarioComponent.ERROR_DURATION) {
-    this.errorMessage = message;
-    this.errorOpen = true;
-    setTimeout(() => this.errorOpen = false, duration);
+  protected validateAnswer(): void {
+    const enigma = this.enigma();
+    if (!enigma?.answer) {
+      return;
+    }
+
+    const expected = ScenarioComponent.normalize(enigma.answer);
+    if (ScenarioComponent.normalize(this.answer()) !== expected) {
+      if (expected.length === 1) {
+        this.showError(
+          `Ce n'est pas la bonne réponse ! Malheureusement, vous avez fait surchauffer le PC central et devez attendre ${PENALTY_DURATION / 1000} secondes avant de pouvoir réessayer.`,
+          PENALTY_DURATION,
+        );
+      } else {
+        this.showError("Ce n'est pas la bonne réponse !");
+      }
+      return;
+    }
+
+    this.loadingNext.set(true);
+    this.router.navigate(['/scenario', this.tools.getEnigmaCode(enigma.color, enigma.number + 1)]);
   }
 
+  /** Donner le focus au bouton referme le clavier virtuel. */
+  protected closeKeyboard(): void {
+    this.sendButton()?.nativeElement.focus();
+  }
+
+  private showError(message: string, duration = ERROR_DURATION): void {
+    clearTimeout(this.errorTimer);
+    this.errorMessage.set(message);
+    this.errorOpen.set(true);
+    this.errorTimer = setTimeout(() => this.errorOpen.set(false), duration);
+  }
+
+  /** Le conteneur n'est pas recréé d'un chapitre à l'autre : il faut le remonter à la main. */
+  private scrollToTop(): void {
+    afterNextRender(() => this.wrapper()?.nativeElement.scrollTo({ top: 0 }), {
+      injector: this.injector,
+    });
+  }
+
+  /** Les accents, la casse et les traits d'union ne doivent pas faire échouer une bonne réponse. */
   private static normalize(str: string): string {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, ' ').toUpperCase();
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/-/g, ' ')
+      .toUpperCase();
   }
-
 }

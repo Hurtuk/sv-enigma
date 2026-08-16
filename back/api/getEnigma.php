@@ -3,8 +3,10 @@
 
     global $db;
 	
-	$code = $_GET['code'];
-	
+	header('Content-Type: application/json; charset=utf-8');
+
+	$code = $_GET['code'] ?? '';
+
 	$enigma = $db->selectVal('SELECT color, code, number, placeEnigma, question, answer, name
 							FROM transitions t
 							INNER JOIN places p

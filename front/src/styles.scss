@@ -16,12 +16,12 @@ body {
 }
 
 body {
-    background: url('/assets/images/steel.jpg') center center no-repeat;;
+    background: url('/assets/images/steel.jpg') center center no-repeat;
     background-color: #11204B;
     background-size: cover;
     position: relative;
     color: white;
-    font-family: 'Poiret One';;
+    font-family: 'Poiret One';
     text-align: center;
 }
 
@@ -116,6 +116,17 @@ ol {
     }
 }
 
+// Utilisée par le lecteur de QR code ci-dessous, sur les deux écrans :
+// elle doit donc vivre ici et non dans le style d'un composant.
+@keyframes fingerprint {
+    from {
+        background-size: 60%;
+    }
+    to {
+        background-size: 70%;
+    }
+}
+
 zxing-scanner {
     aspect-ratio: 1;
     margin: 20px auto;
@@ -126,7 +137,9 @@ zxing-scanner {
     min-width: 220px;
     animation: .5s ease-in 0s infinite alternate fingerprint;
 
-    &::ng-deep video {
+    // Feuille globale : la vidéo du lecteur est atteignable directement,
+    // sans ::ng-deep (qui produirait ici un sélecteur invalide).
+    video {
         height: 100%;
         object-fit: contain;
     }

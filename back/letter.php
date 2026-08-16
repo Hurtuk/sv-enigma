@@ -17,7 +17,7 @@
 		</style>
 	</head>
 	<body>
-		<?= $_GET['letter'] ?>
+		<?= htmlspecialchars($_GET['letter'] ?? '', ENT_QUOTES, 'UTF-8') ?>
 		<div>Trouvez les 12 lettres, devinez l'expression mystère et dites-la à Nicolas, à la sono !</div>
 	</body>
 </html>

@@ -1,11 +1,15 @@
-<img src="/assets/images/ajax-loader.gif" *ngIf="!ready" />
-<ng-container *ngIf="ready">
-    <img class="logo" src="/assets/images/logo9.png" />
-    <p>Vous l'avez entendu : lors de l'inauguration de l'Institution Saint-Victrice, en 1903, le maire de Bihorel Georges Liot a disparu, et vous allez devoir le retrouver&nbsp;!</p>
-    <p>Pour démarrer votre enquête, posez votre index et scannez le QR code de votre équipe.</p>
-    <zxing-scanner
-        (click)="scanOpen = true"
-        [enable]="scanOpen"
-        (scanSuccess)="scanSuccessHandler($event)"
-        ></zxing-scanner>
-</ng-container>
+@if (ready()) {
+  <img class="logo" src="/assets/images/logo9.png" alt="Institution Saint-Victrice" />
+  <p>
+    Vous l'avez entendu : lors de l'inauguration de l'Institution Saint-Victrice, en 1903, le maire
+    de Bihorel Georges Liot a disparu, et vous allez devoir le retrouver&nbsp;!
+  </p>
+  <p>Pour démarrer votre enquête, posez votre index et scannez le QR code de votre équipe.</p>
+  <zxing-scanner
+    [enable]="scanning()"
+    (click)="scanning.set(true)"
+    (scanSuccess)="onTeamScanned($event)"
+  ></zxing-scanner>
+} @else {
+  <img src="/assets/images/ajax-loader.gif" alt="Chargement en cours" />
+}

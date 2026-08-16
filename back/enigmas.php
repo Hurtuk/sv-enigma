@@ -34,12 +34,8 @@
 	}
 	
 	/**********/
-	
-	function getCode($color, $number) {
-		return substr(md5($color), 0, 6).$number;
-	}
-	
-	$req = 'SELECT t.*, q.id as idQuestion, q.question, q.answer, p.name FROM transitions t
+
+	$req ='SELECT t.*, q.id as idQuestion, q.question, q.answer, p.name FROM transitions t
 			INNER JOIN places p ON p.id = t.idPlace
 			LEFT JOIN questions q ON q.id = t.idQuestion
 			ORDER BY color, number';

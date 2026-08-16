@@ -1,25 +1,31 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { Question } from './model/question';
 import { Md5 } from 'ts-md5';
 
-@Injectable({
-  providedIn: 'root'
-})
+import { Question } from './model/question';
+
+/**
+ * Le front et l'API sont servis par le même domaine : une URL relative suffit,
+ * et en développement `proxy.conf.json` la renvoie vers le PHP local.
+ */
+const API_URL = '/api/';
+
+@Injectable({ providedIn: 'root' })
 export class ToolsService {
+  private readonly http = inject(HttpClient);
 
-  constructor(
-    private http: HttpClient
-  ) { }
-
-  public getEnigma(code: string): Observable<Question> {
-    return this.http.get<Question>(environment.apiUrl + 'getEnigma.php', { params: { code } });
+  /** Renvoie `null` si le code ne correspond à aucune étape. */
+  public getEnigma(code: string): Observable<Question | null> {
+    return this.http.get<Question | null>(`${API_URL}getEnigma.php`, { params: { code } });
   }
 
-  public getNextEnigmaCode(color: string, number: number): string {
-    return (new Md5()).appendStr(color + (number + 1)).end()!.toString().substring(0, 10);
+  /**
+   * Recalcule le code d'une étape à partir de la couleur de l'équipe et du chapitre.
+   * C'est ainsi que la table `transitions` a été remplie, et c'est ce que contiennent
+   * les QR codes affichés dans les salles.
+   */
+  public getEnigmaCode(color: string, chapter: number): string {
+    return Md5.hashStr(`${color}${chapter}`).substring(0, 10);
   }
-
 }

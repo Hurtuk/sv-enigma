@@ -1,5 +1,9 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# Copies de la base : elles contiennent toutes les réponses du jeu,
+# et ce dépôt est public.
+*.sql
+
 # compiled output
 /front/dist
 /tmp
