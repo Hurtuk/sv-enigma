@@ -1,0 +1,11 @@
+# Les fichiers du back partent sur un hébergement Linux, et un transfert FTP en
+# mode ASCII avait fini par y laisser des fins de ligne « \r\r\n ». On fixe tout
+# en LF dans le dépôt pour que ça ne se reproduise pas.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.sql binary

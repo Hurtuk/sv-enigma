@@ -4,6 +4,14 @@
 # et ce dépôt est public.
 *.sql
 
+# Identifiants de la base : diffèrent entre le poste local et l'hébergement.
+# Modèle versionné : back/php/config.sample.php
+/back/php/config.php
+
+# Ancien back-office local, désormais fusionné dans back/. Il contient encore
+# les identifiants de production en clair : à ne surtout pas versionner ici.
+/bo/
+
 # compiled output
 /front/dist
 /tmp

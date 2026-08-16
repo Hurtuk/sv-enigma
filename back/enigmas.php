@@ -1,7 +1,10 @@
-<?php	include "php/datamodel.php";		global $db;
-	
+<?php
+	include "php/datamodel.php";
+
+	global $db;
+
 	/* UPDATE */
-	
+
 	if (isset($_POST['action'])) {
 		switch ($_POST['action']) {
 			case 'questions':
@@ -32,22 +35,23 @@
 				break;
 		}
 	}
-	
+
 	/**********/
 
-	$req ='SELECT t.*, q.id as idQuestion, q.question, q.answer, p.name FROM transitions t
+	$req = 'SELECT t.*, q.id as idQuestion, q.question, q.answer, p.name FROM transitions t
 			INNER JOIN places p ON p.id = t.idPlace
 			LEFT JOIN questions q ON q.id = t.idQuestion
 			ORDER BY color, number';
-	
+
 	$transitions = $db->select($req);
-	
+
 	$colors = array('black', 'blue', 'brown', 'cyan', 'gray', 'green', 'lightgreen', 'orange', 'pink', 'purple', 'red', 'yellow');
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>SV back-office</title>
+		<meta charset="utf-8" />
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.25.1/trumbowyg.min.js"></script>
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.25.1/ui/trumbowyg.min.css" rel="stylesheet" />
@@ -87,7 +91,12 @@
 				</thead>
 				<tbody>
 					<?php
-						$last_color = null;						$todo = 0;						$done = 0;
+						// Chaque case vaut deux points à écrire : l'énigme du lieu et
+						// la question posée sur place. Le hall termine le parcours et
+						// n'a pas de question : il ne compte que pour un.
+						$last_color = null;
+						$todo = 0;
+						$done = 0;
 						foreach ($transitions as $t) {
 							if ($last_color != $t['color']) {
 								if ($last_color) {
@@ -99,22 +108,27 @@
 								if (!$t['placeEnigma'] && !$t['question']) { echo '#ff000059'; }
 								else if (!$t['placeEnigma'] && $t['question']) { echo '#ffa50087'; $done++; }
 								else if ($t['placeEnigma'] && !$t['question']) { echo '#0095ff87'; $done++; }
-								else { echo '#00800073'; $done += 2; }								$todo += $t['name'] === 'Le hall' ? 1 : 2;
+								else { echo '#00800073'; $done += 2; }
+								$todo += $t['name'] === 'Le hall' ? 1 : 2;
 							?>" data-id="<?= $t['id'] ?>" data-content="<?= htmlentities($t['placeEnigma']) ?>"><?= $t['name'] ?></td><?php
 							$last_color = $t['color'];
 						}
 					?>
 					</tr>
 				</tbody>
-				</table>				<p>Faits : <?= round($done * 100 / $todo) ?>%</p>
+			</table>
+			<p>Faits : <?= $todo ? round($done * 100 / $todo) : 0 ?>%</p>
 		</fieldset>
 		<fieldset style="float: left">
 			<legend>Les lieux</legend>
 			<ul>
 				<?php
 					$places = $db->select('SELECT * FROM places ORDER BY name');
-					foreach ($places as $p) {						if ($p['name'] !== 'Le hall') {
-							?><li><input type="radio" name="place" class="choose-place" id="place-<?= $p['id'] ?>" value="<?= $p['id'] ?>" /><label for="place-<?= $p['id'] ?>" value="<?= $p['id'] ?>"><?= $p['name'] ?></label></li><?php						}
+					foreach ($places as $p) {
+						// Le hall n'accueille pas d'énigme : rien à y rédiger.
+						if ($p['name'] !== 'Le hall') {
+							?><li><input type="radio" name="place" class="choose-place" id="place-<?= $p['id'] ?>" value="<?= $p['id'] ?>" /><label for="place-<?= $p['id'] ?>" value="<?= $p['id'] ?>"><?= $p['name'] ?></label></li><?php
+						}
 					}
 				?>
 			</ul>

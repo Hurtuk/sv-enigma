@@ -48,6 +48,7 @@ npm run build    # build de production -> front/dist/sv-enigma/browser
 `back/` sur `http://localhost:8080`. Par exemple :
 
 ```bash
+cp back/php/config.sample.php back/php/config.php   # une seule fois
 php -S localhost:8080 -t back
 ```
 
@@ -63,7 +64,8 @@ au même endroit que le build du front :
 htdocs/
 ├── .htaccess          (réécriture SPA : tout ce qui n'existe pas -> index.html)
 ├── api/getEnigma.php  (le seul endpoint : une étape à partir de son code)
-├── php/DB.class.php   (couche PDO ; identifiants de la base ici)
+├── php/DB.class.php   (couche PDO)
+├── php/config.php     (identifiants de la base — NON versionné)
 ├── php/datamodel.php  (en-têtes CORS + instanciation de $db)
 ├── enigmas.php        (back-office de rédaction des énigmes)
 ├── letter.php         (affiche une lettre en grand, ciblée par QR code)
@@ -78,8 +80,21 @@ chapitre, qui relie une salle et une question).
 Les colonnes sont en `latin1` tandis que `DB.class.php` fait `SET NAMES utf8` :
 la conversion se fait à la volée, ne pas « corriger » l'un sans l'autre.
 
+Les identifiants de la base sont dans `back/php/config.php`, exclu du dépôt car
+celui-ci est public. Le modèle à recopier est `back/php/config.sample.php`.
+Rien n'est affiché au navigateur en cas d'erreur : tout va dans le journal du
+serveur, préfixé `[sv-enigma]`.
+
+`enigmas.php` est le back-office : il liste les douze parcours, colore chaque
+étape selon ce qui reste à rédiger, et ouvre un éditeur riche sur l'énigme
+choisie. **Il n'est protégé par aucune authentification** alors qu'il écrit
+directement en base.
+
 ## Déploiement
 
 1. `cd front && npm run build`
 2. Envoyer le contenu de `front/dist/sv-enigma/browser/` dans `htdocs/`
 3. Envoyer le contenu de `back/` dans `htdocs/` (fusion à la racine)
+
+`php/config.php` n'étant pas dans le dépôt, il vit sur le serveur avec les
+identifiants de l'hébergement : ne pas l'écraser en déployant.
