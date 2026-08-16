@@ -68,6 +68,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/sv/",
               "budgets": [
                 {
                   "type": "initial",

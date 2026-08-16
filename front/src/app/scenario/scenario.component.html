@@ -35,7 +35,7 @@
           (click)="validateAnswer()"
         >
           @if (loadingNext()) {
-            <img src="/assets/images/ajax-loader.gif" width="50" alt="Chargement en cours" />
+            <img src="assets/images/ajax-loader.gif" width="50" alt="Chargement en cours" />
           } @else {
             Envoyer
           }
@@ -44,7 +44,7 @@
     }
   </div>
 } @else {
-  <img src="/assets/images/ajax-loader.gif" class="loader" alt="Chargement en cours" />
+  <img src="assets/images/ajax-loader.gif" class="loader" alt="Chargement en cours" />
 }
 
 <div class="answer-panel panel-error" [class.opened]="errorOpen()">

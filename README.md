@@ -1,6 +1,6 @@
 # SvEnigma
 
-Jeu de piste de l'Institution Saint-Victrice — https://mystere.saintvictrice.fr
+Jeu de piste de l'Institution Saint-Victrice — https://nicoailleurs.com/sv
 
 Douze équipes, identifiées par une couleur, parcourent l'établissement pour
 retrouver Georges Liot, maire de Bihorel disparu le soir de l'inauguration, en 1903.
@@ -27,7 +27,7 @@ et c'est aussi ce que le front recalcule pour passer au chapitre suivant.
 
 ```
 front/   Application Angular (le jeu)
-back/    API et pages PHP, servies à la racine du domaine
+back/    API et pages PHP, servies au même endroit que le front
 ```
 
 ## Front (`front/`)
@@ -52,16 +52,35 @@ cp back/php/config.sample.php back/php/config.php   # une seule fois
 php -S localhost:8080 -t back
 ```
 
-En production comme en développement, le front appelle `/api/` en relatif :
-il n'y a pas d'URL d'API à configurer, le front et l'API partageant le domaine.
+### Le site n'est pas servi à la racine du domaine
+
+Il vit sous `/sv`. Rien n'est codé en dur : tout est résolu contre le
+`<base href>`, que `angular.json` renseigne (`baseHref: "/sv/"`) uniquement en
+configuration de production — le serveur de développement reste sur `/`.
+Déménager ne demande donc que de changer cette ligne… **et de rejouer la
+migration SQL** si le préfixe change à nouveau (voir plus bas).
+
+Conséquence sur les images, qui vivent à deux endroits selon qui les consomme :
+
+| Dossier | Pour quoi | Résolution |
+|---|---|---|
+| `src/assets/images/` | fonds appelés depuis un SCSS | le build les émet hashées dans `media/`, l'URL est réécrite relativement à la feuille |
+| `public/assets/images/` | images citées dans un template | copiées telles quelles, appelées en relatif (`assets/…`) |
+
+Un `url()` de SCSS est résolu **à la compilation** : une image de `public/` y est
+introuvable et fait échouer le build. C'est ce qui dicte la répartition.
+
+L'API, elle, ne peut pas être appelée en simple relatif : `HttpClient` résoudrait
+contre l'URL courante, donc `/sv/scenario/<code>/api/…`. `tools.service.ts`
+la résout explicitement contre `document.baseURI`.
 
 ## Back (`back/`)
 
-PHP + MySQL. Le contenu de `back/` est déployé **à la racine** de `htdocs`,
-au même endroit que le build du front :
+PHP + MySQL. Le contenu de `back/` est déployé au même endroit que le build du
+front, soit `/nicoailleurs/sv` en FTP :
 
 ```
-htdocs/
+sv/
 ├── .htaccess          (réécriture SPA : tout ce qui n'existe pas -> index.html)
 ├── api/getEnigma.php  (le seul endpoint : une étape à partir de son code)
 ├── php/DB.class.php   (couche PDO)
@@ -69,9 +88,14 @@ htdocs/
 ├── php/datamodel.php  (en-têtes CORS + instanciation de $db)
 ├── enigmas.php        (back-office de rédaction des énigmes)
 ├── letter.php         (affiche une lettre en grand, ciblée par QR code)
-├── *.png              (images utilisées par les énigmes, appelées à la racine)
+├── migrations/*.sql   (à jouer à la main ; non déployé)
+├── *.png              (images citées par les énigmes stockées en base)
 └── ...                (contenu de front/dist/sv-enigma/browser)
 ```
+
+Le `.htaccess` ne doit contenir **aucune directive `Options`** : le mutualisé LWS
+restreint `AllowOverride` et répond 500 sur tout le dossier, images comprises,
+dès qu'il en rencontre une. Son `RewriteBase` doit suivre le préfixe du site.
 
 La base `mystery` compte trois tables : `places` (les salles), `questions`
 (énigme + réponse) et `transitions` (le parcours d'une couleur, une ligne par
@@ -92,9 +116,27 @@ directement en base.
 
 ## Déploiement
 
-1. `cd front && npm run build`
-2. Envoyer le contenu de `front/dist/sv-enigma/browser/` dans `htdocs/`
-3. Envoyer le contenu de `back/` dans `htdocs/` (fusion à la racine)
+Cible : `https://nicoailleurs.com/sv`, soit `/nicoailleurs/sv` en FTP.
+
+1. `cd front && npm run build` (la configuration de production pose `baseHref: /sv/`)
+2. Envoyer le contenu de `front/dist/sv-enigma/browser/` dans `sv/` —
+   `index.html` **en dernier**, après les bundles qu'il référence
+3. Envoyer le contenu de `back/` dans `sv/`, sauf `migrations/`
+
+Ne pas supprimer le dossier distant avant de publier : écraser en place suffit,
+et un transfert interrompu laisse alors l'ancienne version fonctionnelle.
 
 `php/config.php` n'étant pas dans le dépôt, il vit sur le serveur avec les
 identifiants de l'hébergement : ne pas l'écraser en déployant.
+
+### Migration de la base
+
+Le dump de l'ancien hébergement est antérieur au passage en sous-répertoire :
+les six énigmes du musée y citent encore leurs images en `src="/badge.png"`.
+Après import sur le nouveau serveur, jouer une fois :
+
+```
+back/migrations/2026-08-16-images-relatives.sql
+```
+
+Elle est rejouable sans dommage.

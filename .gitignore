@@ -1,8 +1,9 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Copies de la base : elles contiennent toutes les réponses du jeu,
-# et ce dépôt est public.
+# et ce dépôt est public. Les migrations, elles, sont du code : on les garde.
 *.sql
+!/back/migrations/*.sql
 
 # Identifiants de la base : diffèrent entre le poste local et l'hébergement.
 # Modèle versionné : back/php/config.sample.php

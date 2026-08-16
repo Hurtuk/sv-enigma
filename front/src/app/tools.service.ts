@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -5,19 +6,24 @@ import { Md5 } from 'ts-md5';
 
 import { Question } from './model/question';
 
-/**
- * Le front et l'API sont servis par le même domaine : une URL relative suffit,
- * et en développement `proxy.conf.json` la renvoie vers le PHP local.
- */
-const API_URL = '/api/';
-
 @Injectable({ providedIn: 'root' })
 export class ToolsService {
   private readonly http = inject(HttpClient);
 
+  /**
+   * Le front et l'API sont servis par le même domaine, mais pas forcément à sa
+   * racine : en production le site vit sous `/sv/`. L'URL est donc résolue contre
+   * le `<base href>` de la page, que le build renseigne.
+   *
+   * On ne peut pas se contenter d'un chemin relatif : HttpClient le résoudrait
+   * contre l'URL courante, ce qui donnerait `/sv/scenario/<code>/api/` sur une
+   * page de chapitre.
+   */
+  private readonly apiUrl = new URL('api/', inject(DOCUMENT).baseURI).href;
+
   /** Renvoie `null` si le code ne correspond à aucune étape. */
   public getEnigma(code: string): Observable<Question | null> {
-    return this.http.get<Question | null>(`${API_URL}getEnigma.php`, { params: { code } });
+    return this.http.get<Question | null>(`${this.apiUrl}getEnigma.php`, { params: { code } });
   }
 
   /**

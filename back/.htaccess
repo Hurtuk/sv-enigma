@@ -1,7 +1,17 @@
-Options +FollowSymLinks
+# Réécriture SPA : toute URL qui ne correspond pas à un fichier réel est servie
+# par index.html, qui laisse le routeur Angular faire le reste.
+#
+# Pas de directive « Options » ici : le mutualisé LWS restreint AllowOverride et
+# répond 500 sur l'intégralité du dossier dès qu'il en rencontre une, images
+# comprises. L'ancien « Options +FollowSymLinks » a donc été retiré.
 
 <ifModule mod_rewrite.c>
     RewriteEngine On
+
+    # Le site est servi depuis un sous-répertoire : sans cette base, la
+    # substitution repartirait de la racine du domaine.
+    RewriteBase /sv/
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} !index
