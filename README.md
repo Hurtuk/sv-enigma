@@ -1,27 +1,51 @@
 # SvEnigma
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.0.
+Jeu d'énigmes de la Saint-Victrice — https://mystere.saintvictrice.fr
 
-## Development server
+## Organisation
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+```
+front/   Application Angular 16 (source du jeu)
+back/    API et pages PHP, servies à la racine du domaine
+```
 
-## Code scaffolding
+## Front (`front/`)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Application Angular générée avec Angular CLI. Toutes les commandes se lancent
+depuis `front/` :
 
-## Build
+```bash
+cd front
+npm install
+npm start        # serveur de dev sur http://localhost:4200/
+npm run build    # build de dev  -> front/dist/sv-enigma
+ng build --configuration production   # build de prod
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+L'URL de l'API est définie dans `src/environments/environment.ts` (dev) et
+`src/environments/environment.prod.ts` (prod).
 
-## Running unit tests
+## Back (`back/`)
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+PHP + MySQL. Le contenu de `back/` est déployé **à la racine** de `htdocs`,
+au même endroit que le build du front, ce qui donne l'arborescence en ligne :
 
-## Running end-to-end tests
+```
+htdocs/
+├── .htaccess          (réécriture SPA : tout ce qui n'existe pas -> index.html)
+├── api/getEnigma.php  (endpoint appelé par le front)
+├── php/DB.class.php   (couche PDO)
+├── php/datamodel.php  (headers CORS + instanciation de $db)
+├── enigmas.php        (page d'admin des énigmes)
+├── letter.php         (page « lettre » affichée via QR code)
+├── *.png              (images de lettres, ciblées directement par URL)
+└── ...                (contenu de front/dist/sv-enigma)
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Les identifiants de la base sont dans `back/php/DB.class.php`.
 
-## Further help
+## Déploiement
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+1. `cd front && ng build --configuration production`
+2. Envoyer le contenu de `front/dist/sv-enigma/` dans `htdocs/`
+3. Envoyer le contenu de `back/` dans `htdocs/` (fusion à la racine)
